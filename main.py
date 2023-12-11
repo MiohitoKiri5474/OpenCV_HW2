@@ -13,6 +13,75 @@ from PyQt5.QtWidgets import (
     QWidget,
 )
 
+# General
+def get_path():
+    global file_name
+    file_name = QFileDialog.getOpenFileName(None, "open file", ".")[0]
+
+# Load images
+def load_img_btn_clicked():
+    global image
+    get_path()
+    image = cv2.imread ( file_name )
+    if image is None:
+        print ( "[ERROR]: Image cannot load. " )
+    else:
+        print ( "Loaded Image ", file_name )
+
+# For Block1
+def Block1_btn_1_1_clicked():
+    print ( "TODO: 1.1" )
+
+
+def Block1_btn_1_2_clicked():
+    print ( "TODO: 1.2" )
+
+# For Block2
+def Block2_btn_clicked():
+    print ( "TODO: 2" )
+
+# For Block3
+def Block3_btn_3_1_clicked():
+    print ( "TODO: 3.1" )
+
+def Block3_btn_3_2_clicked():
+    print ( "TODO: 3.2" )
+
+# For Block4
+def Block4_btn_4_1_clicked():
+    print ( "TODO: 4.1" )
+
+def Block4_btn_4_2_clicked():
+    print ( "TODO: 4.2" )
+
+def Block4_btn_4_3_clicked():
+    print ( "TODO: 4.3" )
+
+def Block4_btn_4_4_clicked():
+    print ( "TODO: 4.4" )
+
+# For Block5
+def Block5_load_img_clicked():
+    global Block5_img
+    get_path()
+    Block5_image = cv2.imread ( file_name )
+    if image is None:
+        print ( "[ERROR]: Image cannot load. " )
+    else:
+        print ( "Loaded Image ", file_name )
+
+def Block5_btn_5_1_clicked():
+    print ( "TODO: 5.1" )
+
+
+def Block5_btn_5_2_clicked():
+    print ( "TODO: 5.2" )
+
+def Block5_btn_5_3_clicked():
+    print ( "TODO: 5.3" )
+
+def Block5_btn_5_4_clicked():
+    print ( "TODO: 5.4" )
 
 def main():
     # --------------------------- #
@@ -114,6 +183,36 @@ def main():
     Block5_layout.addWidget ( Block5_btn_5_3 )
     Block5_layout.addWidget ( Block5_btn_5_4 )
     block5.setLayout ( Block5_layout )
+
+    # --------------------------- #
+    # Connect functions and BNTs
+
+    # Load images
+    load_img_btn.clicked.connect ( load_img_btn_clicked )
+
+    # For Block1
+    Block1_btn_1_1.clicked.connect ( Block1_btn_1_1_clicked )
+    Block1_btn_1_2.clicked.connect ( Block1_btn_1_2_clicked )
+
+    # For Block2
+    Block2_btn.clicked.connect ( Block2_btn_clicked )
+
+    # For Block3
+    Block3_btn_3_1.clicked.connect ( Block3_btn_3_1_clicked )
+    Block3_btn_3_2.clicked.connect ( Block3_btn_3_2_clicked )
+
+    # For Block4
+    Block4_btn_4_1.clicked.connect ( Block4_btn_4_1_clicked )
+    Block4_btn_4_2.clicked.connect ( Block4_btn_4_2_clicked )
+    Block4_btn_4_3.clicked.connect ( Block4_btn_4_3_clicked )
+    Block4_btn_4_4.clicked.connect ( Block4_btn_4_4_clicked )
+
+    # For Block5
+    Block5_load_img.clicked.connect ( Block5_load_img_clicked )
+    Block5_btn_5_1.clicked.connect ( Block5_btn_5_1_clicked )
+    Block5_btn_5_2.clicked.connect ( Block5_btn_5_2_clicked )
+    Block5_btn_5_3.clicked.connect ( Block5_btn_5_3_clicked )
+    Block5_btn_5_4.clicked.connect ( Block5_btn_5_4_clicked )
 
     # --------------------------- #
     # Add the blocks into the layouts
