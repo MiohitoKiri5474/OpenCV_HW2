@@ -51,7 +51,7 @@ def circle_process():
         blurred,
         cv2.HOUGH_GRADIENT,
         dp=1,
-        minDist=20,
+        minDist=30,
         param1=100,
         param2=10,
         minRadius=20,
@@ -71,15 +71,16 @@ def Block1_btn_1_1_clicked():
         return
 
     center = np.zeros_like(image)
+    process = image.copy()
     circles = circle_process()
 
     if circles is not None:
         for i in circles[0, :]:
-            cv2.circle(image, (i[0], i[1]), i[2], (0, 255, 0), 2)
+            cv2.circle(process, (i[0], i[1]), i[2], (0, 255, 0), 2)
             cv2.circle(center, (i[0], i[1]), 2, (255, 255, 255), 3)
 
-    cv2.imshow("img_src", cv2.imread(file_name))
-    cv2.imshow("img_process", image)
+    cv2.imshow("img_src", image)
+    cv2.imshow("img_process", process)
     cv2.imshow("Circle_center", center)
     cv2.waitKey(0)
     cv2.destroyAllWindows()
@@ -97,6 +98,7 @@ def Block1_btn_1_2_clicked():
     if circles is not None:
         for i in circles[0, :]:
             cnt = cnt + 1
+            print(f"({i[0]}, {i[1]}), {i[2]}")
 
     Block1_label.setText("There are " + str(cnt) + " coins in the image. ")
 
@@ -110,26 +112,41 @@ def Block2_btn_clicked():
     gray_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     equalized_image = cv2.equalizeHist(gray_image)
 
-    plt.figure(figsize=(10, 5))
+    ori_hist, ori_bins = hist, bins = np.histogram(gray_image.flatten(), 256, [0, 256])
+    pdf = hist / hist.sum()
+    cdf = np.cumsum(pdf)
+    lookup_table = np.round(cdf * 255).astype("uint8")
+    equalized_image_manual = cv2.LUT(gray_image, lookup_table)
+
+    plt.figure(figsize=(15, 5))
 
     plt.subplot(2, 3, 1)
     plt.title("Original Image")
     plt.imshow(gray_image, cmap="gray")
+    plt.axis("off")
 
     plt.subplot(2, 3, 2)
     plt.title("Equalized with OpenCV")
     plt.imshow(equalized_image, cmap="gray")
+    plt.axis("off")
+
+    plt.subplot(2, 3, 3)
+    plt.title("Equalized Manually")
+    plt.imshow(equalized_image_manual, cmap="gray")
+    plt.axis("off")
+
+    plt.subplot(2, 3, 6)
+    plt.title("Histogram of Equalized (Manually)")
+    man_hist, man_bins = np.histogram(equalized_image_manual.flatten(), 256, [0, 256])
+    plt.bar(range(256), man_hist, width=1, color="gray")
 
     plt.subplot(2, 3, 4)
     plt.title("Histogram of Original")
-    ori_hist, ori_bins = np.histogram(gray_image.flatten(), 256, [0, 256])
-    ori_hist = ori_hist / ori_hist.sum()
     plt.bar(range(256), ori_hist, width=1, color="gray")
 
     plt.subplot(2, 3, 5)
     plt.title("Histogram of Equalized (OpenCV)")
     equ_hist, equ_bins = np.histogram(equalized_image.flatten(), 256, [0, 256])
-    equ_hist = equ_hist / equ_hist.sum()
     plt.bar(range(256), equ_hist, width=1, color="gray")
 
     plt.show()
