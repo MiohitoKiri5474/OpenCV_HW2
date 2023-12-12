@@ -1,9 +1,21 @@
 import sys
 
 import cv2
+import matplotlib.pyplot as plt
 import numpy as np
-from PyQt5.QtWidgets import (QApplication, QFileDialog, QHBoxLayout, QLabel,
-                             QLineEdit, QPushButton, QVBoxLayout, QWidget)
+from PyQt5.QtWidgets import (
+    QApplication,
+    QFileDialog,
+    QHBoxLayout,
+    QLabel,
+    QLineEdit,
+    QPushButton,
+    QVBoxLayout,
+    QWidget,
+)
+
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 
 file_name = None
 image = None
@@ -79,6 +91,7 @@ def Block1_btn_1_2_clicked():
     print("Count Coins clicked")
     if image is None:
         print("[ERROR]: Please load image first. ")
+        return
 
     circles = circle_process()
 
@@ -92,7 +105,37 @@ def Block1_btn_1_2_clicked():
 
 # For Block2
 def Block2_btn_clicked():
-    print("TODO: 2")
+    if image is None:
+        print("[ERROR]: Please Load image first. ")
+        return
+
+    gray_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    equalized_image = cv2.equalizeHist(gray_image)
+
+    plt.figure ( figsize = ( 10, 5 ) )
+
+    plt.subplot ( 2, 3, 1 )
+    plt.title ( 'Original Image' )
+    plt.imshow ( gray_image, cmap = 'gray' )
+
+    plt.subplot ( 2, 3, 2 )
+    plt.title ( 'Equalized Image' )
+    plt.imshow ( equalized_image, cmap = 'gray' )
+
+    plt.subplot ( 2, 3, 4 )
+    ori_hist, ori_bins = np.histogram ( gray_image.flatten(), 256, [0, 256] )
+    ori_hist = ori_hist / ori_hist.sum()
+    plt.bar ( range ( 256 ), ori_hist, width = 1, color = 'gray' )
+
+    plt.subplot ( 2, 3, 5 )
+    equ_hist, equ_bins = np.histogram ( equalized_image.flatten(), 256, [0, 256] )
+    equ_hist = equ_hist / equ_hist.sum()
+    plt.bar ( range ( 256 ), equ_hist, width = 1, color = 'gray' )
+
+    plt.show()
+
+    # cv2.waitKey(0)
+    # cv2.destroyAllWindows()
 
 
 # For Block3
