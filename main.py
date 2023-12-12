@@ -119,15 +119,17 @@ def Block2_btn_clicked():
     plt.imshow ( gray_image, cmap = 'gray' )
 
     plt.subplot ( 2, 3, 2 )
-    plt.title ( 'Equalized Image' )
+    plt.title ( 'Equalized with OpenCV' )
     plt.imshow ( equalized_image, cmap = 'gray' )
 
     plt.subplot ( 2, 3, 4 )
+    plt.title ( 'Histogram of Original' )
     ori_hist, ori_bins = np.histogram ( gray_image.flatten(), 256, [0, 256] )
     ori_hist = ori_hist / ori_hist.sum()
     plt.bar ( range ( 256 ), ori_hist, width = 1, color = 'gray' )
 
     plt.subplot ( 2, 3, 5 )
+    plt.title ( 'Histogram of Equalized (OpenCV)' )
     equ_hist, equ_bins = np.histogram ( equalized_image.flatten(), 256, [0, 256] )
     equ_hist = equ_hist / equ_hist.sum()
     plt.bar ( range ( 256 ), equ_hist, width = 1, color = 'gray' )
