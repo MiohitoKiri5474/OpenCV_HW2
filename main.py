@@ -3,6 +3,7 @@ import sys
 import cv2
 import matplotlib.pyplot as plt
 import numpy as np
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from PyQt5.QtWidgets import (
     QApplication,
     QFileDialog,
@@ -13,9 +14,6 @@ from PyQt5.QtWidgets import (
     QVBoxLayout,
     QWidget,
 )
-
-from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
-from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 
 file_name = None
 image = None
@@ -112,27 +110,27 @@ def Block2_btn_clicked():
     gray_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     equalized_image = cv2.equalizeHist(gray_image)
 
-    plt.figure ( figsize = ( 10, 5 ) )
+    plt.figure(figsize=(10, 5))
 
-    plt.subplot ( 2, 3, 1 )
-    plt.title ( 'Original Image' )
-    plt.imshow ( gray_image, cmap = 'gray' )
+    plt.subplot(2, 3, 1)
+    plt.title("Original Image")
+    plt.imshow(gray_image, cmap="gray")
 
-    plt.subplot ( 2, 3, 2 )
-    plt.title ( 'Equalized with OpenCV' )
-    plt.imshow ( equalized_image, cmap = 'gray' )
+    plt.subplot(2, 3, 2)
+    plt.title("Equalized with OpenCV")
+    plt.imshow(equalized_image, cmap="gray")
 
-    plt.subplot ( 2, 3, 4 )
-    plt.title ( 'Histogram of Original' )
-    ori_hist, ori_bins = np.histogram ( gray_image.flatten(), 256, [0, 256] )
+    plt.subplot(2, 3, 4)
+    plt.title("Histogram of Original")
+    ori_hist, ori_bins = np.histogram(gray_image.flatten(), 256, [0, 256])
     ori_hist = ori_hist / ori_hist.sum()
-    plt.bar ( range ( 256 ), ori_hist, width = 1, color = 'gray' )
+    plt.bar(range(256), ori_hist, width=1, color="gray")
 
-    plt.subplot ( 2, 3, 5 )
-    plt.title ( 'Histogram of Equalized (OpenCV)' )
-    equ_hist, equ_bins = np.histogram ( equalized_image.flatten(), 256, [0, 256] )
+    plt.subplot(2, 3, 5)
+    plt.title("Histogram of Equalized (OpenCV)")
+    equ_hist, equ_bins = np.histogram(equalized_image.flatten(), 256, [0, 256])
     equ_hist = equ_hist / equ_hist.sum()
-    plt.bar ( range ( 256 ), equ_hist, width = 1, color = 'gray' )
+    plt.bar(range(256), equ_hist, width=1, color="gray")
 
     plt.show()
 
