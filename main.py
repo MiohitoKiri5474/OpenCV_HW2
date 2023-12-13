@@ -209,13 +209,7 @@ def Block3_btn_3_2_clicked():
 
     gray_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     _, binary_image = cv2.threshold(gray_image, 127, 255, cv2.THRESH_BINARY)
-    kernel = np.ones(
-        (
-            3,
-            3,
-        ),
-        np.uint8,
-    )
+    kernel = np.ones((3, 3), np.uint8)
     result = dilation(erosion(binary_image, kernel), kernel)
 
     cv2.imshow("Original Image", gray_image)
