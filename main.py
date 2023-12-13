@@ -65,7 +65,7 @@ def circle_process():
 
 
 def Block1_btn_1_1_clicked():
-    print("Draw Contour clicked")
+    print("1.1 Draw Contour clicked")
     if image is None:
         print("[ERROR]: Please load image first. ")
         return
@@ -87,7 +87,7 @@ def Block1_btn_1_1_clicked():
 
 
 def Block1_btn_1_2_clicked():
-    print("Count Coins clicked")
+    print("1.2 Count Coins clicked")
     if image is None:
         print("[ERROR]: Please load image first. ")
         return
@@ -105,6 +105,7 @@ def Block1_btn_1_2_clicked():
 
 # For Block2
 def Block2_btn_clicked():
+    print("2 Histogram clicked")
     if image is None:
         print("[ERROR]: Please Load image first. ")
         return
@@ -151,17 +152,76 @@ def Block2_btn_clicked():
 
     plt.show()
 
-    # cv2.waitKey(0)
-    # cv2.destroyAllWindows()
-
 
 # For Block3
+def erosion(image, kernel):
+    rows, cols = image.shape
+    k_rows, k_cols = kernel.shape
+    result = np.zeros((rows, cols), dtype=np.uint8)
+
+    for i in range(rows):
+        for j in range(cols):
+            roi = image[i : i + k_rows, j : j + k_cols]
+
+            if roi.shape == kernel.shape:
+                result[i, j] = np.min(roi)
+
+    return result
+
+
+def dilation(image, kernel):
+    rows, cols = image.shape
+    k_rows, k_cols = kernel.shape
+    result = np.zeros((rows, cols), dtype=np.uint8)
+
+    for i in range(rows):
+        for j in range(cols):
+            roi = image[i : i + k_rows, j : j + k_cols]
+
+            if roi.shape == kernel.shape:
+                result[i, j] = np.max(roi)
+
+    return result
+
+
 def Block3_btn_3_1_clicked():
-    print("TODO: 3.1")
+    print("3.1 Closing clicked")
+    if image is None:
+        print("[ERROR]: Please load image first. ")
+        return
+
+    gray_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    _, binary_image = cv2.threshold(gray_image, 127, 255, cv2.THRESH_BINARY)
+    kernel = np.ones((3, 3), np.uint8)
+    result = erosion(dilation(binary_image, kernel), kernel)
+
+    cv2.imshow("Original Image", gray_image)
+    cv2.imshow("Result", result)
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
 
 
 def Block3_btn_3_2_clicked():
-    print("TODO: 3.2")
+    print("3.2 Opening clicked")
+    if image is None:
+        print("[ERROR]: Please load image first. ")
+        return
+
+    gray_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    _, binary_image = cv2.threshold(gray_image, 127, 255, cv2.THRESH_BINARY)
+    kernel = np.ones(
+        (
+            3,
+            3,
+        ),
+        np.uint8,
+    )
+    result = dilation(erosion(binary_image, kernel), kernel)
+
+    cv2.imshow("Original Image", gray_image)
+    cv2.imshow("Result", result)
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
 
 
 # For Block4
