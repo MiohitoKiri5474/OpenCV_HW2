@@ -121,6 +121,7 @@ valid_accuracies = []
 print ( "finish loading module" )
 
 for epoch in range(epochs):
+    print ( epoch )
     model.train()
     running_loss = 0.0
     correct_train = 0
