@@ -1,9 +1,15 @@
+import os
 import sys
 
 import cv2
 import matplotlib.pyplot as plt
 import numpy as np
+import torch
+import torch.nn as nn
+import torchsummary
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+from PyQt5.QtCore import QPoint, Qt
+from PyQt5.QtGui import QColor, QPainter, QPixmap
 from PyQt5.QtWidgets import (
     QApplication,
     QFileDialog,
@@ -14,6 +20,7 @@ from PyQt5.QtWidgets import (
     QVBoxLayout,
     QWidget,
 )
+from torchvision.models import vgg19_bn
 
 file_name = None
 image = None
@@ -21,6 +28,12 @@ app = QApplication(sys.argv)
 window = QWidget()
 
 Block1_label = QLabel("There are _ coins in the image. ")
+Block4_blank = QLabel("")
+blank_pixmap = QPixmap(Block4_blank.size())
+Block4_Predict = QLabel("")
+
+MNIST_Model = None
+mouse_pos = None
 
 
 # General
@@ -219,20 +232,67 @@ def Block3_btn_3_2_clicked():
 
 
 # For Block4
+def clear_block4_blank():
+    global mouse_pos
+    blank_pixmap.fill(Qt.black)
+    Block4_blank.setPixmap(blank_pixmap)
+    mouse_pos = None
+
+
+def mouse_move(self):
+    global mouse_pos
+    if self.buttons() == Qt.LeftButton and mouse_pos:
+        painter = QPainter(blank_pixmap)
+        painter.setPen(QColor(Qt.white))
+        painter.drawLine(mouse_pos, self.pos() + QPoint(125, 0))
+        painter.end()
+
+        Block4_blank.setPixmap(blank_pixmap)
+        mouse_pos = self.pos() + QPoint(125, 0)
+
+
+def mouse_press(self):
+    global mouse_pos
+    if self.button() == 1:
+        mouse_pos = self.pos() + QPoint(125, 0)
+
+
+def mouse_release(self):
+    global mouse_pos
+    if self.button() == 1:
+        mouse_pos = None
+
+
 def Block4_btn_4_1_clicked():
-    print("TODO: 4.1")
+    print("4.1 Load Model and Show Model Structure clicked")
+    model = vgg19_bn(pretrained=False, num_classes=10)
+
+    torchsummary.summary(model, (3, 224, 224))
 
 
 def Block4_btn_4_2_clicked():
     print("TODO: 4.2")
+    pixmap = QPixmap("test.jpg")
+    pixmap = pixmap.scaled(400, 500, Qt.KeepAspectRatio)
+    Block4_blank.setPixmap(pixmap)
+    Block4_blank.setAlignment(Qt.AlignCenter)
 
 
 def Block4_btn_4_3_clicked():
-    print("TODO: 4.3")
+    print("4.3 Predict Clicked")
+    if MNIST_Model is None:
+        print("TODO: Load Model")
+
+    # save the image
+    blank_pixmap.save("predict.png")
+
+    # clean the tmp files
+    os.remove("predict.png")
 
 
 def Block4_btn_4_4_clicked():
-    print("TODO: 4.4")
+    print("4.4 Reset clicked")
+    clear_block4_blank()
 
 
 # For Block5
@@ -343,13 +403,28 @@ def main():
     block3.setLayout(Block3_layout)
 
     # For Block4
+    Block4_layout_overall_with_title = QVBoxLayout()
+    Block4_layout_overall = QHBoxLayout()
+
     Block4_layout = QVBoxLayout()
-    Block4_layout.addWidget(QLabel("4. MNIST Classifier Using VGG19"))
     Block4_layout.addWidget(Block4_btn_4_1)
     Block4_layout.addWidget(Block4_btn_4_2)
     Block4_layout.addWidget(Block4_btn_4_3)
     Block4_layout.addWidget(Block4_btn_4_4)
-    block4.setLayout(Block4_layout)
+    Block4_layout.addWidget(Block4_Predict)
+
+    Block4_image_layout = QVBoxLayout()
+    Block4_blank.setAlignment(Qt.AlignCenter)
+    Block4_blank.setFixedSize(400, 500)
+    Block4_image_layout.addWidget(Block4_blank)
+
+    Block4_layout_overall_with_title.addWidget(
+        QLabel("4. MNIST Classifier Using VGG19")
+    )
+    Block4_layout_overall.addLayout(Block4_layout)
+    Block4_layout_overall.addLayout(Block4_image_layout)
+    Block4_layout_overall_with_title.addLayout(Block4_layout_overall)
+    block4.setLayout(Block4_layout_overall_with_title)
 
     # For Block3
     Block5_layout = QVBoxLayout()
@@ -383,6 +458,11 @@ def main():
     Block4_btn_4_2.clicked.connect(Block4_btn_4_2_clicked)
     Block4_btn_4_3.clicked.connect(Block4_btn_4_3_clicked)
     Block4_btn_4_4.clicked.connect(Block4_btn_4_4_clicked)
+    Block4_blank.setMouseTracking(True)
+    Block4_blank.mouseMoveEvent = mouse_move
+    Block4_blank.mousePressEvent = mouse_press
+    Block4_blank.mouseReleaseEvent = mouse_release
+    clear_block4_blank()
 
     # For Block5
     Block5_load_img.clicked.connect(Block5_load_img_clicked)
