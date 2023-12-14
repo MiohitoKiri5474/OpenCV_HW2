@@ -1,3 +1,6 @@
+import os
+
+import matplotlib.pyplot as plt
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -5,8 +8,7 @@ import torchvision
 import torchvision.transforms as transforms
 from torch.utils.data import DataLoader
 from torchvision.datasets import MNIST
-import matplotlib.pyplot as plt
-import os
+
 
 # Define VGG19 with Batch Normalization
 class VGG19_BN(nn.Module):
@@ -20,7 +22,6 @@ class VGG19_BN(nn.Module):
             nn.BatchNorm2d(64),
             nn.ReLU(inplace=True),
             nn.MaxPool2d(kernel_size=2, stride=2),
-            
             nn.Conv2d(64, 128, kernel_size=3, padding=1),
             nn.BatchNorm2d(128),
             nn.ReLU(inplace=True),
@@ -28,7 +29,6 @@ class VGG19_BN(nn.Module):
             nn.BatchNorm2d(128),
             nn.ReLU(inplace=True),
             nn.MaxPool2d(kernel_size=2, stride=2),
-            
             nn.Conv2d(128, 256, kernel_size=3, padding=1),
             nn.BatchNorm2d(256),
             nn.ReLU(inplace=True),
@@ -42,7 +42,6 @@ class VGG19_BN(nn.Module):
             nn.BatchNorm2d(256),
             nn.ReLU(inplace=True),
             nn.MaxPool2d(kernel_size=2, stride=2),
-            
             nn.Conv2d(256, 512, kernel_size=3, padding=1),
             nn.BatchNorm2d(512),
             nn.ReLU(inplace=True),
@@ -56,7 +55,6 @@ class VGG19_BN(nn.Module):
             nn.BatchNorm2d(512),
             nn.ReLU(inplace=True),
             nn.MaxPool2d(kernel_size=2, stride=2),
-            
             nn.Conv2d(512, 512, kernel_size=3, padding=1),
             nn.BatchNorm2d(512),
             nn.ReLU(inplace=True),
@@ -89,6 +87,7 @@ class VGG19_BN(nn.Module):
         x = self.classifier(x)
         return x
 
+
 # Hyperparameters
 batch_size = 64
 learning_rate = 0.001
@@ -96,16 +95,15 @@ epochs = 30
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # Data preprocessing and loading
-transform = transforms.Compose([transforms.Resize((32, 32)),
-                                transforms.ToTensor()])
+transform = transforms.Compose([transforms.Resize((32, 32)), transforms.ToTensor()])
 
-train_dataset = MNIST(root='./data', train=True, transform=transform, download=True)
+train_dataset = MNIST(root="./data", train=True, transform=transform, download=True)
 train_loader = DataLoader(dataset=train_dataset, batch_size=batch_size, shuffle=True)
 
-test_dataset = MNIST(root='./data', train=False, transform=transform, download=True)
+test_dataset = MNIST(root="./data", train=False, transform=transform, download=True)
 test_loader = DataLoader(dataset=test_dataset, batch_size=batch_size, shuffle=False)
 
-print ( "finish download" )
+print("finish download")
 
 # Model, loss function, and optimizer
 model = VGG19_BN().to(device)
@@ -118,10 +116,9 @@ train_accuracies = []
 valid_losses = []
 valid_accuracies = []
 
-print ( "finish loading module" )
+print("finish loading module")
 
 for epoch in range(epochs):
-    print ( epoch )
     model.train()
     running_loss = 0.0
     correct_train = 0
@@ -172,15 +169,33 @@ for epoch in range(epochs):
     valid_losses.append(valid_loss)
     valid_accuracies.append(valid_accuracy)
 
-    print(f'Epoch {epoch + 1}/{epochs}, '
-          f'Training Loss: {train_loss:.4f}, Training Accuracy: {train_accuracy:.4f}, '
-          f'Validation Loss: {valid_loss:.4f}, Validation Accuracy: {valid_accuracy:.4f}')
+    print(
+        f"Epoch {epoch + 1}/{epochs}, "
+        f"Training Loss: {train_loss:.4f}, Training Accuracy: {train_accuracy:.4f}, "
+        f"Validation Loss: {valid_loss:.4f}, Validation Accuracy: {valid_accuracy:.4f}"
+    )
 
 # Save model weights
-torch.save(model.state_dict(), 'vgg19_bn_mnist.pth')
+torch.save(model.state_dict(), "vgg19_bn_mnist.pth")
 
 # Plot training/validation loss and accuracy
 plt.figure(figsize=(10, 5))
 
 plt.subplot(1, 2, 1)
+plt.plot(train_losses, label='Training Loss')
+plt.plot(valid_losses, label='Validation Loss')
+plt.xlabel('Epochs')
+plt.ylabel('Loss')
+plt.legend()
+plt.title('Training and Validation Loss')
 
+plt.subplot(1, 2, 2)
+plt.plot(train_accuracies, label='Training Accuracy')
+plt.plot(valid_accuracies, label='Validation Accuracy')
+plt.xlabel('Epochs')
+plt.ylabel('Accuracy')
+plt.legend()
+plt.title('Training and Validation Accuracy')
+
+# Save the figure as an image
+plt.savefig('training_validation_plots.png')
