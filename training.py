@@ -8,85 +8,7 @@ import torchvision
 import torchvision.transforms as transforms
 from torch.utils.data import DataLoader
 from torchvision.datasets import MNIST
-
-
-# Define VGG19 with Batch Normalization
-class VGG19_BN(nn.Module):
-    def __init__(self):
-        super(VGG19_BN, self).__init__()
-        self.features = nn.Sequential(
-            nn.Conv2d(1, 64, kernel_size=3, padding=1),
-            nn.BatchNorm2d(64),
-            nn.ReLU(inplace=True),
-            nn.Conv2d(64, 64, kernel_size=3, padding=1),
-            nn.BatchNorm2d(64),
-            nn.ReLU(inplace=True),
-            nn.MaxPool2d(kernel_size=2, stride=2),
-            nn.Conv2d(64, 128, kernel_size=3, padding=1),
-            nn.BatchNorm2d(128),
-            nn.ReLU(inplace=True),
-            nn.Conv2d(128, 128, kernel_size=3, padding=1),
-            nn.BatchNorm2d(128),
-            nn.ReLU(inplace=True),
-            nn.MaxPool2d(kernel_size=2, stride=2),
-            nn.Conv2d(128, 256, kernel_size=3, padding=1),
-            nn.BatchNorm2d(256),
-            nn.ReLU(inplace=True),
-            nn.Conv2d(256, 256, kernel_size=3, padding=1),
-            nn.BatchNorm2d(256),
-            nn.ReLU(inplace=True),
-            nn.Conv2d(256, 256, kernel_size=3, padding=1),
-            nn.BatchNorm2d(256),
-            nn.ReLU(inplace=True),
-            nn.Conv2d(256, 256, kernel_size=3, padding=1),
-            nn.BatchNorm2d(256),
-            nn.ReLU(inplace=True),
-            nn.MaxPool2d(kernel_size=2, stride=2),
-            nn.Conv2d(256, 512, kernel_size=3, padding=1),
-            nn.BatchNorm2d(512),
-            nn.ReLU(inplace=True),
-            nn.Conv2d(512, 512, kernel_size=3, padding=1),
-            nn.BatchNorm2d(512),
-            nn.ReLU(inplace=True),
-            nn.Conv2d(512, 512, kernel_size=3, padding=1),
-            nn.BatchNorm2d(512),
-            nn.ReLU(inplace=True),
-            nn.Conv2d(512, 512, kernel_size=3, padding=1),
-            nn.BatchNorm2d(512),
-            nn.ReLU(inplace=True),
-            nn.MaxPool2d(kernel_size=2, stride=2),
-            nn.Conv2d(512, 512, kernel_size=3, padding=1),
-            nn.BatchNorm2d(512),
-            nn.ReLU(inplace=True),
-            nn.Conv2d(512, 512, kernel_size=3, padding=1),
-            nn.BatchNorm2d(512),
-            nn.ReLU(inplace=True),
-            nn.Conv2d(512, 512, kernel_size=3, padding=1),
-            nn.BatchNorm2d(512),
-            nn.ReLU(inplace=True),
-            nn.Conv2d(512, 512, kernel_size=3, padding=1),
-            nn.BatchNorm2d(512),
-            nn.ReLU(inplace=True),
-            nn.MaxPool2d(kernel_size=2, stride=2),
-        )
-        self.avgpool = nn.AdaptiveAvgPool2d((7, 7))
-        self.classifier = nn.Sequential(
-            nn.Linear(512 * 7 * 7, 4096),
-            nn.ReLU(inplace=True),
-            nn.Dropout(),
-            nn.Linear(4096, 4096),
-            nn.ReLU(inplace=True),
-            nn.Dropout(),
-            nn.Linear(4096, 10),  # Assuming 10 classes for MNIST
-        )
-
-    def forward(self, x):
-        x = self.features(x)
-        x = self.avgpool(x)
-        x = torch.flatten(x, 1)
-        x = self.classifier(x)
-        return x
-
+from torchvision.models import vgg19_bn
 
 # Hyperparameters
 batch_size = 64
@@ -97,16 +19,19 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 # Data preprocessing and loading
 transform = transforms.Compose([transforms.Resize((32, 32)), transforms.ToTensor()])
 
-train_dataset = MNIST(root="./data", train=True, transform=transform, download=True)
+train_dataset = MNIST(root="./drive/MyDrive/data", train=True, transform=transform, download=True)
 train_loader = DataLoader(dataset=train_dataset, batch_size=batch_size, shuffle=True)
 
-test_dataset = MNIST(root="./data", train=False, transform=transform, download=True)
+test_dataset = MNIST(root="./drive/MyDrive/data", train=False, transform=transform, download=True)
 test_loader = DataLoader(dataset=test_dataset, batch_size=batch_size, shuffle=False)
 
 print("finish download")
 
 # Model, loss function, and optimizer
-model = VGG19_BN().to(device)
+model = vgg19_bn().to(device)
+
+model.features[0] = nn.Conv2d(1, 64, kernel_size=3, stride=1, padding=1).to(device)
+
 criterion = nn.CrossEntropyLoss()
 optimizer = optim.Adam(model.parameters(), lr=learning_rate)
 
@@ -176,26 +101,27 @@ for epoch in range(epochs):
     )
 
 # Save model weights
-torch.save(model.state_dict(), "vgg19_bn_mnist.pth")
+torch.save(model.state_dict(), "./drive/MyDrive/vgg19_bn_mnist.pth")
 
 # Plot training/validation loss and accuracy
 plt.figure(figsize=(10, 5))
 
 plt.subplot(1, 2, 1)
-plt.plot(train_losses, label='Training Loss')
-plt.plot(valid_losses, label='Validation Loss')
-plt.xlabel('Epochs')
-plt.ylabel('Loss')
+plt.plot(train_losses, label="Training Loss")
+plt.plot(valid_losses, label="Validation Loss")
+plt.xlabel("Epochs")
+plt.ylabel("Loss")
 plt.legend()
-plt.title('Training and Validation Loss')
+plt.title("Training and Validation Loss")
 
 plt.subplot(1, 2, 2)
-plt.plot(train_accuracies, label='Training Accuracy')
-plt.plot(valid_accuracies, label='Validation Accuracy')
-plt.xlabel('Epochs')
-plt.ylabel('Accuracy')
+plt.plot(train_accuracies, label="Training Accuracy")
+plt.plot(valid_accuracies, label="Validation Accuracy")
+plt.xlabel("Epochs")
+plt.ylabel("Accuracy")
 plt.legend()
-plt.title('Training and Validation Accuracy')
+plt.title("Training and Validation Accuracy")
 
 # Save the figure as an image
-plt.savefig('training_validation_plots.png')
+plt.savefig("./drive/MyDrive/training_validation_plots.png")
+
