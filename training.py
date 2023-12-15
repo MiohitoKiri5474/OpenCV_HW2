@@ -17,7 +17,13 @@ epochs = 30
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # Data preprocessing and loading
-transform = transforms.Compose([transforms.Resize((32, 32)), transforms.ToTensor()])
+transform = transforms.Compose(
+    [
+        transforms.ToTensor(),
+        transforms.Grayscale(),
+        transforms.Resize((32, 32)),
+    ]
+)
 
 train_dataset = MNIST(root="./drive/MyDrive/data", train=True, transform=transform, download=True)
 train_dataset = [item for item in train_dataset if item[1] < 10]
