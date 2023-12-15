@@ -25,11 +25,11 @@ transform = transforms.Compose(
     ]
 )
 
-train_dataset = MNIST(root="./drive/MyDrive/data", train=True, transform=transform, download=True)
+train_dataset = MNIST(root="./data", train=True, transform=transform, download=True)
 train_dataset = [item for item in train_dataset if item[1] < 10]
 train_loader = DataLoader(dataset=train_dataset, batch_size=batch_size, shuffle=True)
 
-test_dataset = MNIST(root="./drive/MyDrive/data", train=False, transform=transform, download=True)
+test_dataset = MNIST(root="./data", train=False, transform=transform, download=True)
 train_dataset = [item for item in train_dataset if item[1] < 10]
 test_loader = DataLoader(dataset=test_dataset, batch_size=batch_size, shuffle=False)
 
@@ -109,7 +109,7 @@ for epoch in range(epochs):
     )
 
 # Save model weights
-torch.save(model.state_dict(), "./drive/MyDrive/vgg19_bn_mnist.pth")
+torch.save(model.state_dict(), "./MyDrive/vgg19_bn_mnist.pth")
 
 # Plot training/validation loss and accuracy
 plt.figure(figsize=(10, 5))
@@ -131,5 +131,5 @@ plt.legend()
 plt.title("Training and Validation Accuracy")
 
 # Save the figure as an image
-plt.savefig("./drive/MyDrive/training_validation_plots.png")
+plt.savefig("./training_validation_plots.png")
 
