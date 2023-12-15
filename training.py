@@ -20,9 +20,11 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 transform = transforms.Compose([transforms.Resize((32, 32)), transforms.ToTensor()])
 
 train_dataset = MNIST(root="./drive/MyDrive/data", train=True, transform=transform, download=True)
+train_dataset = [item for item in train_dataset if item[1] < 10]
 train_loader = DataLoader(dataset=train_dataset, batch_size=batch_size, shuffle=True)
 
 test_dataset = MNIST(root="./drive/MyDrive/data", train=False, transform=transform, download=True)
+train_dataset = [item for item in train_dataset if item[1] < 10]
 test_loader = DataLoader(dataset=test_dataset, batch_size=batch_size, shuffle=False)
 
 print("finish download")
@@ -106,7 +108,7 @@ torch.save(model.state_dict(), "./drive/MyDrive/vgg19_bn_mnist.pth")
 # Plot training/validation loss and accuracy
 plt.figure(figsize=(10, 5))
 
-plt.subplot(1, 2, 1)
+plt.subplot(2, 1, 1)
 plt.plot(train_losses, label="Training Loss")
 plt.plot(valid_losses, label="Validation Loss")
 plt.xlabel("Epochs")
@@ -114,7 +116,7 @@ plt.ylabel("Loss")
 plt.legend()
 plt.title("Training and Validation Loss")
 
-plt.subplot(1, 2, 2)
+plt.subplot(2, 1, 2)
 plt.plot(train_accuracies, label="Training Accuracy")
 plt.plot(valid_accuracies, label="Validation Accuracy")
 plt.xlabel("Epochs")
