@@ -1,4 +1,5 @@
 import os
+import shutil
 
 import matplotlib.pyplot as plt
 import torch
@@ -6,39 +7,41 @@ import torch.nn as nn
 import torch.optim as optim
 import torchvision
 import torchvision.transforms as transforms
-from torch.utils.data import DataLoader
+from torch.utils.data import DataLoader, random_split
 from torchvision.datasets import MNIST
 from torchvision.models import vgg19_bn
 
 # Hyperparameters
 batch_size = 64
-learning_rate = 0.001
-epochs = 30
+learning_rate = 0.0001
+epochs = 50
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # Data preprocessing and loading
 transform = transforms.Compose(
     [
         transforms.ToTensor(),
-        transforms.Grayscale(),
+        transforms.Normalize((0.5,), (0.5,)),
         transforms.Resize((32, 32)),
     ]
 )
 
-train_dataset = MNIST(root="./data", train=True, transform=transform, download=True)
-train_dataset = [item for item in train_dataset if item[1] < 10]
-train_loader = DataLoader(dataset=train_dataset, batch_size=batch_size, shuffle=True)
+shutil.rmtree("./data/")
 
-test_dataset = MNIST(root="./data", train=False, transform=transform, download=True)
-train_dataset = [item for item in train_dataset if item[1] < 10]
-test_loader = DataLoader(dataset=test_dataset, batch_size=batch_size, shuffle=False)
+dataset = MNIST(root="./data", train=True, transform=transform, download=True)
+train_loader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
+dataset = MNIST(root="./data", train=False, transform=transform, download=True)
+test_loader = DataLoader(dataset, batch_size=batch_size, shuffle=False)
 
 print("finish download")
 
 # Model, loss function, and optimizer
 model = vgg19_bn().to(device)
 
-model.features[0] = nn.Conv2d(1, 64, kernel_size=3, stride=1, padding=1).to(device)
+model.features[0] = nn.Conv2d(
+    1, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1)
+).to(device)
+model.classifier[-1] = nn.Linear(4096, 128).to(device)
 
 criterion = nn.CrossEntropyLoss()
 optimizer = optim.Adam(model.parameters(), lr=learning_rate)
@@ -109,7 +112,7 @@ for epoch in range(epochs):
     )
 
 # Save model weights
-torch.save(model.state_dict(), "./MyDrive/vgg19_bn_mnist.pth")
+torch.save(model.state_dict(), "./vgg19_bn_mnist.pth")
 
 # Plot training/validation loss and accuracy
 plt.figure(figsize=(10, 5))
@@ -132,4 +135,3 @@ plt.title("Training and Validation Accuracy")
 
 # Save the figure as an image
 plt.savefig("./training_validation_plots.png")
-

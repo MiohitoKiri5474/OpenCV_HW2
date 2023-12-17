@@ -8,5 +8,5 @@ run:
 	poetry run python3 main.py
 
 lint:
-	isort main.py
-	black main.py
+	isort *.py
+	black *.py

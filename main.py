@@ -1,5 +1,6 @@
 import os
 import sys
+from collections import OrderedDict
 
 import cv2
 import matplotlib.pyplot as plt
@@ -7,9 +8,11 @@ import numpy as np
 import torch
 import torch.nn as nn
 import torchsummary
+import torchvision.transforms as transforms
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+from PIL import Image
 from PyQt5.QtCore import QPoint, Qt
-from PyQt5.QtGui import QColor, QPainter, QPixmap
+from PyQt5.QtGui import QColor, QPainter, QPen, QPixmap
 from PyQt5.QtWidgets import (
     QApplication,
     QFileDialog,
@@ -20,7 +23,11 @@ from PyQt5.QtWidgets import (
     QVBoxLayout,
     QWidget,
 )
-from torchvision.models import vgg19_bn
+
+from model import VGG19 as vgg19_bn
+
+model_path = "model.pth"
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 file_name = None
 image = None
@@ -29,10 +36,26 @@ window = QWidget()
 
 Block1_label = QLabel("There are _ coins in the image. ")
 Block4_blank = QLabel("")
+Block4_blank.setAlignment(Qt.AlignCenter)
+Block4_blank.setFixedSize(800, 400)
 blank_pixmap = QPixmap(Block4_blank.size())
 Block4_Predict = QLabel("")
 
-MNIST_Model = None
+MNIST_Model = vgg19_bn(in_channels=1, num_classes=10).to(device)
+state_dict = torch.load(model_path, map_location=torch.device(device))
+MNIST_Model.load_state_dict(state_dict["model_state_dict"])
+MNIST_Model.to(device)
+MNIST_Model.eval()
+
+transform = transforms.Compose(
+    [
+        transforms.ToPILImage(),
+        transforms.Resize((224, 224)),
+        transforms.ToTensor(),
+        transforms.Normalize(mean=[0.5], std=[0.5]),
+    ]
+)
+
 mouse_pos = None
 
 
@@ -243,18 +266,20 @@ def mouse_move(self):
     global mouse_pos
     if self.buttons() == Qt.LeftButton and mouse_pos:
         painter = QPainter(blank_pixmap)
-        painter.setPen(QColor(Qt.white))
-        painter.drawLine(mouse_pos, self.pos() + QPoint(125, 0))
+        pen = QPen(QColor(Qt.white))
+        pen.setWidth(10)
+        painter.setPen(pen)
+        painter.drawLine(mouse_pos, self.pos())
         painter.end()
 
         Block4_blank.setPixmap(blank_pixmap)
-        mouse_pos = self.pos() + QPoint(125, 0)
+        mouse_pos = self.pos()
 
 
 def mouse_press(self):
     global mouse_pos
     if self.button() == 1:
-        mouse_pos = self.pos() + QPoint(125, 0)
+        mouse_pos = self.pos()
 
 
 def mouse_release(self):
@@ -272,19 +297,37 @@ def Block4_btn_4_1_clicked():
 
 def Block4_btn_4_2_clicked():
     print("TODO: 4.2")
-    pixmap = QPixmap("test.jpg")
-    pixmap = pixmap.scaled(400, 500, Qt.KeepAspectRatio)
+    pixmap = QPixmap("plot.png")
+    pixmap = pixmap.scaled(Block4_blank.size(), Qt.KeepAspectRatio)
     Block4_blank.setPixmap(pixmap)
     Block4_blank.setAlignment(Qt.AlignCenter)
 
 
 def Block4_btn_4_3_clicked():
     print("4.3 Predict Clicked")
-    if MNIST_Model is None:
-        print("TODO: Load Model")
 
     # save the image
     blank_pixmap.save("predict.png")
+
+    ori_img = cv2.imread("predict.png")
+    gray_img = cv2.cvtColor(ori_img, cv2.COLOR_BGR2GRAY)
+    image = transform(gray_img)
+    image = image.unsqueeze(0).to(device)
+    output = MNIST_Model(image)
+    label = np.array(output.detach()).argmax()
+
+    Block4_Predict.setText(str(label))
+
+    plt.bar(
+        range(10),
+        torch.nn.functional.softmax(output.detach()[0], dim=0),
+        align="center",
+    )
+    plt.xticks(range(10), [str(i) for i in range(10)])
+    plt.xlabel("Class")
+    plt.ylabel("Probability")
+    plt.title(str(label))
+    plt.show()
 
     # clean the tmp files
     os.remove("predict.png")
@@ -293,6 +336,7 @@ def Block4_btn_4_3_clicked():
 def Block4_btn_4_4_clicked():
     print("4.4 Reset clicked")
     clear_block4_blank()
+    Block4_Predict.setText("")
 
 
 # For Block5
@@ -414,8 +458,6 @@ def main():
     Block4_layout.addWidget(Block4_Predict)
 
     Block4_image_layout = QVBoxLayout()
-    Block4_blank.setAlignment(Qt.AlignCenter)
-    Block4_blank.setFixedSize(400, 500)
     Block4_image_layout.addWidget(Block4_blank)
 
     Block4_layout_overall_with_title.addWidget(

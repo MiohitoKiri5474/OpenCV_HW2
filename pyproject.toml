@@ -16,6 +16,7 @@ torch = "^2.1.1"
 torchvision = "^0.16.1"
 cpython = "^0.0.6"
 pyqt5 = "^5.15.10"
+tdqm = "^0.0.1"
 
 
 [build-system]
