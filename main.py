@@ -31,9 +31,9 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 file_name = None
 image = None
+Block5_img = None
 app = QApplication(sys.argv)
 window = QWidget()
-
 Block1_label = QLabel("There are _ coins in the image. ")
 Block4_blank = QLabel("")
 Block4_blank.setAlignment(Qt.AlignCenter)
@@ -290,7 +290,7 @@ def mouse_release(self):
 
 def Block4_btn_4_1_clicked():
     print("4.1 Load Model and Show Model Structure clicked")
-    model = vgg19_bn(pretrained=False, num_classes=10)
+    model = vgg19_bn(in_channels=3, num_classes=10)
 
     torchsummary.summary(model, (3, 224, 224))
 
@@ -351,11 +351,29 @@ def Block5_load_img_clicked():
 
 
 def Block5_btn_5_1_clicked():
-    print("TODO: 5.1")
+    print("5.1 Show Images clicked")
+
+    image1 = cv2.imread("./dataset/inference_dataset/Cat/190315.jpg")
+    image2 = cv2.imread("./dataset/inference_dataset/Dog/12051.jpg")
+
+    plt.subplot(1, 2, 1)
+    plt.title("Cat")
+    plt.imshow(cv2.cvtColor(image1, cv2.COLOR_BGR2RGB))
+    plt.axis("off")
+    plt.subplot(1, 2, 2)
+    plt.title("Dog")
+    plt.imshow(cv2.cvtColor(image2, cv2.COLOR_BGR2RGB))
+    plt.axis("off")
+
+    plt.show()
 
 
 def Block5_btn_5_2_clicked():
     print("TODO: 5.2")
+    print("5.2 Show Model Structure clicked")
+    # model = vgg19_bn(in_channels = 3, num_classes=10)
+
+    # torchsummary.summary(model, (3, 224, 224))
 
 
 def Block5_btn_5_3_clicked():
