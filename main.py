@@ -25,13 +25,13 @@ from PyQt5.QtWidgets import (
 )
 
 from model import VGG19 as vgg19_bn
+from model import ResNet50 as resnet50
 
-model_path = "model.pth"
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 file_name = None
 image = None
 Block5_img = None
+mouse_pos = None
 app = QApplication(sys.argv)
 window = QWidget()
 Block1_label = QLabel("There are _ coins in the image. ")
@@ -40,12 +40,18 @@ Block4_blank.setAlignment(Qt.AlignCenter)
 Block4_blank.setFixedSize(800, 400)
 blank_pixmap = QPixmap(Block4_blank.size())
 Block4_Predict = QLabel("")
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-MNIST_Model = vgg19_bn(in_channels=1, num_classes=10).to(device)
-state_dict = torch.load(model_path, map_location=torch.device(device))
-MNIST_Model.load_state_dict(state_dict["model_state_dict"])
-MNIST_Model.to(device)
-MNIST_Model.eval()
+vgg19_model = None
+
+def load_vgg19():
+    global vgg19_model
+    vgg19_model_path = "model.pth"
+    vgg19_model = vgg19_bn(in_channels=1, num_classes=10).to(device)
+    state_dict = torch.load(vgg19_model_path, map_location=torch.device(device))
+    vgg19_model.load_state_dict(state_dict["model_state_dict"])
+    vgg19_model.to(device)
+    vgg19_model.eval()
 
 transform = transforms.Compose(
     [
@@ -56,7 +62,6 @@ transform = transforms.Compose(
     ]
 )
 
-mouse_pos = None
 
 
 # General
@@ -313,7 +318,7 @@ def Block4_btn_4_3_clicked():
     gray_img = cv2.cvtColor(ori_img, cv2.COLOR_BGR2GRAY)
     image = transform(gray_img)
     image = image.unsqueeze(0).to(device)
-    output = MNIST_Model(image)
+    output = vgg19_model(image)
     label = np.array(output.detach()).argmax()
 
     Block4_Predict.setText(str(label))
@@ -556,4 +561,5 @@ def main():
 
 
 if __name__ == "__main__":
+    load_vgg19()
     main()
