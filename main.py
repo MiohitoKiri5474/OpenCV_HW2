@@ -27,7 +27,6 @@ from PyQt5.QtWidgets import (
 from model import VGG19 as vgg19_bn
 from model import ResNet50 as resnet50
 
-
 file_name = None
 image = None
 Block5_img = None
@@ -44,14 +43,16 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 vgg19_model = None
 
+
 def load_vgg19():
     global vgg19_model
     vgg19_model_path = "model.pth"
     vgg19_model = vgg19_bn(in_channels=1, num_classes=10).to(device)
     state_dict = torch.load(vgg19_model_path, map_location=torch.device(device))
-    vgg19_model.load_state_dict(state_dict["model_state_dict"])
+    vgg19_model.load_state_dict(state_dict)
     vgg19_model.to(device)
     vgg19_model.eval()
+
 
 transform = transforms.Compose(
     [
@@ -61,7 +62,6 @@ transform = transforms.Compose(
         transforms.Normalize(mean=[0.5], std=[0.5]),
     ]
 )
-
 
 
 # General
@@ -302,7 +302,7 @@ def Block4_btn_4_1_clicked():
 
 def Block4_btn_4_2_clicked():
     print("TODO: 4.2")
-    pixmap = QPixmap("plot.png")
+    pixmap = QPixmap("vgg19_plot.png")
     pixmap = pixmap.scaled(Block4_blank.size(), Qt.KeepAspectRatio)
     Block4_blank.setPixmap(pixmap)
     Block4_blank.setAlignment(Qt.AlignCenter)

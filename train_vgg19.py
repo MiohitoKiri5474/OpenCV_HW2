@@ -44,9 +44,12 @@ total_params = sum(p.numel() for p in model.parameters())
 total_trainable_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
 
 criterion = nn.CrossEntropyLoss()
+"""
 optimizer = optim.SGD(
     model.parameters(), lr=learning_rate, momentum=mtm, weight_decay=wd
 )
+"""
+optimizer = optim.Adam(model.parameters(), lr=0.001)
 
 print(f"[INFO]: Computation device: {device}")
 print(f"[INFO]: {total_params:,} total parameters.")

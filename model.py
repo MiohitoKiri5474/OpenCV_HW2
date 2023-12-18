@@ -79,3 +79,8 @@ class VGG19(nn.Module):
         x = x.view(x.size(0), -1)
         x = self.linear_layers(x)
         return x
+
+
+class ResNet50:
+    def __init__():
+        pass
