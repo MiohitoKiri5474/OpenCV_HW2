@@ -63,7 +63,7 @@ class VGG19(nn.Module):
             nn.BatchNorm2d(512),
             nn.ReLU(),
             nn.MaxPool2d(kernel_size=2, stride=2),
-            nn.AdaptiveAvgPool2d((2, 2)),
+            # nn.AdaptiveAvgPool2d((2, 2)),
         )
         self.linear_layers = nn.Sequential(
             nn.Linear(in_features=512 * 7 * 7, out_features=4096),
@@ -72,7 +72,7 @@ class VGG19(nn.Module):
             nn.Linear(in_features=4096, out_features=4096),
             nn.ReLU(),
             nn.Dropout2d(0.5),
-            nn.Linear(4096, num_classes),  # Assuming 10 classes for MNIST
+            nn.Linear(4096, num_classes),
         )
 
     def forward(self, x):
@@ -87,35 +87,60 @@ class Bottleneck(nn.Module):
         super(Bottleneck, self).__init__()
         self.expansion = expansion
         self.downsampling = downsampling
-        
-        self.bottleneck = nn.Sequential (
-            nn.Conv2d ( in_channels = in_places, out_channels = places, kernel_size = 1, stride = 1, bias = False ),
-            nn.BatchNorm2d ( places ),
-            nn.ReLU ( inplace = True ),
-            nn.Conv2d ( in_channels = places, out_channels = places, kernel_size = 3, stride = stride, padding = 1, bias = False ),
-            nn.BatchNorm2d ( places ),
-            nn.ReLU ( inplace = True ),
-            nn.Conv2d ( in_channels = places, out_channels = places * self.expansion, kernel_size = 1, stride = 1, bias = False ),
-            nn.BatchNorm2d ( places * self.expansion ),
+
+        self.bottleneck = nn.Sequential(
+            nn.Conv2d(
+                in_channels=in_places,
+                out_channels=places,
+                kernel_size=1,
+                stride=1,
+                bias=False,
+            ),
+            nn.BatchNorm2d(places),
+            nn.ReLU(inplace=True),
+            nn.Conv2d(
+                in_channels=places,
+                out_channels=places,
+                kernel_size=3,
+                stride=stride,
+                padding=1,
+                bias=False,
+            ),
+            nn.BatchNorm2d(places),
+            nn.ReLU(inplace=True),
+            nn.Conv2d(
+                in_channels=places,
+                out_channels=places * self.expansion,
+                kernel_size=1,
+                stride=1,
+                bias=False,
+            ),
+            nn.BatchNorm2d(places * self.expansion),
         )
 
         if self.downsampling:
-            self.downsampling = nn.Sequential (
-                nn.Conv2d ( in_channels = in_places, out_channels = places * self.expansion, kernel_size = 1, stride = stride, bias = False ),
-                nn.BatchNorm2d ( places * self.expansion ),
+            self.downsampling = nn.Sequential(
+                nn.Conv2d(
+                    in_channels=in_places,
+                    out_channels=places * self.expansion,
+                    kernel_size=1,
+                    stride=stride,
+                    bias=False,
+                ),
+                nn.BatchNorm2d(places * self.expansion),
             )
 
-        self.relu = nn.ReLU ( inplace = True )
+        self.relu = nn.ReLU(inplace=True)
 
-    def forward ( self, x ):
+    def forward(self, x):
         residual = x
-        out = self.bottleneck ( x )
+        out = self.bottleneck(x)
 
         if self.downsampling:
-            residual = self.downsampling ( x )
+            residual = self.downsampling(x)
 
         out += residual
-        out = self.relu ( out )
+        out = self.relu(out)
         return out
 
 
@@ -170,7 +195,7 @@ class ResNet(nn.Module):
         return nn.Sequential(*layers)
 
     def forward(self, x):
-        x = conv1(x)
+        x = self.conv1(x)
 
         x = self.layer1(x)
         x = self.layer2(x)

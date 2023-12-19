@@ -8,6 +8,7 @@ import numpy as np
 import torch
 import torch.nn as nn
 import torchsummary
+import torchvision
 import torchvision.transforms as transforms
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from PIL import Image
@@ -25,7 +26,7 @@ from PyQt5.QtWidgets import (
 )
 
 from model import VGG19 as vgg19_bn
-from model import ResNet50 as resnet50
+from model import ResNet as resnet50
 
 file_name = None
 image = None
@@ -46,9 +47,9 @@ vgg19_model = None
 
 def load_vgg19():
     global vgg19_model
-    vgg19_model_path = "model.pth"
+    vgg19_model_path = "model_VGG19_BN.pth"
     vgg19_model = vgg19_bn(in_channels=1, num_classes=10).to(device)
-    state_dict = torch.load(vgg19_model_path, map_location=torch.device(device))
+    state_dict = torch.load("model_VGG19_BN.pth", map_location=torch.device(device))
     vgg19_model.load_state_dict(state_dict)
     vgg19_model.to(device)
     vgg19_model.eval()
@@ -302,7 +303,7 @@ def Block4_btn_4_1_clicked():
 
 def Block4_btn_4_2_clicked():
     print("TODO: 4.2")
-    pixmap = QPixmap("vgg19_plot.png")
+    pixmap = QPixmap("VGG19_BN_plot.png")
     pixmap = pixmap.scaled(Block4_blank.size(), Qt.KeepAspectRatio)
     Block4_blank.setPixmap(pixmap)
     Block4_blank.setAlignment(Qt.AlignCenter)
@@ -376,9 +377,9 @@ def Block5_btn_5_1_clicked():
 def Block5_btn_5_2_clicked():
     print("TODO: 5.2")
     print("5.2 Show Model Structure clicked")
-    # model = vgg19_bn(in_channels = 3, num_classes=10)
+    _model = torchvision.models.resnet50()
 
-    # torchsummary.summary(model, (3, 224, 224))
+    torchsummary.summary(_model, (3, 224, 224))
 
 
 def Block5_btn_5_3_clicked():

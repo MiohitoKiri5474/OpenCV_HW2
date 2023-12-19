@@ -7,46 +7,49 @@ import torchvision
 import torchvision.transforms as transforms
 from tqdm import tqdm
 
-from model import VGG19
+from model import ResNet
 
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+device = torch.device ( "cuda" if torch.cuda.is_available() else "cpu" )
 epochs = 30
-batch_size = 32
+batch_size = 16
 learning_rate = 0.001
-mtm = 0.9
-wd = 0.0005
 
 transform = transforms.Compose(
     [
-        transforms.Resize((224, 224)),
+        transforms.Resize(256),
+        transforms.RandomHorizontalFlip(),
+        transforms.RandomVerticalFlip(),
+        transforms.RandomRotation(degrees=45),
+        transforms.ColorJitter(brightness=0.5, contrast=0.5, saturation=0.5, hue=0.5),
+        transforms.CenterCrop(224),
         transforms.ToTensor(),
-        transforms.Normalize(mean=(0.5), std=(0.5)),
+        transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225]),
     ]
 )
 
-train_dataset = torchvision.datasets.MNIST(
-    root="./data", train=True, download=True, transform=transform
+train_dataset = torchvision.datasets.ImageFolder(
+    root="./dataset/training_dataset/", transform=transform
 )
-train_dataloader = torch.utils.data.DataLoader(
+train_loader = torch.utils.data.DataLoader(
     train_dataset, batch_size=batch_size, shuffle=True
 )
 
-valid_dataset = torchvision.datasets.MNIST(
-    root="./data", train=False, download=True, transform=transform
+valid_dataset = torchvision.datasets.ImageFolder(
+    root="./dataset/validation_dataset/", transform=transform
 )
-valid_dataloader = torch.utils.data.DataLoader(
+valid_loader = torch.utils.data.DataLoader(
     valid_dataset, batch_size=batch_size, shuffle=False
 )
 
-model = VGG19(in_channels=1, num_classes=10).to(device)
+model = ResNet ( blocks = [3, 4, 6, 3], num_classes = 10 ).to ( device )
+
 
 total_params = sum(p.numel() for p in model.parameters())
 total_trainable_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
 
-criterion = nn.CrossEntropyLoss()
-optimizer = optim.SGD(
-    model.parameters(), lr=learning_rate, momentum=mtm, weight_decay=wd
-)
+criterion = torch.nn.CrossEntropyLoss()
+optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
+
 
 print(f"[INFO]: Computation device: {device}")
 print(f"[INFO]: {total_params:,} total parameters.")
@@ -117,8 +120,6 @@ def validating(model, dataloader, criterion):
     epoch_loss = valid_running_loss / counter
     epoch_acc = 100.0 * (valid_running_correct / len(dataloader.dataset))
     print("\n")
-    for i in range(10):
-        print(f"Accuracy of digit {i}: {100*class_correct[i]/class_total[i]}")
 
     return epoch_loss, epoch_acc
 
@@ -131,9 +132,9 @@ for epoch in range(epochs):
     print(f"[INFO]: Epoch {epoch+1} of {epochs}")
 
     train_epoch_loss, train_epoch_acc = training(
-        model, train_dataloader, optimizer, criterion
+        model, train_loader, optimizer, criterion
     )
-    valid_epoch_loss, valid_epoch_acc = validating(model, valid_dataloader, criterion)
+    valid_epoch_loss, valid_epoch_acc = validating(model, valid_loader, criterion)
 
     train_loss.append(train_epoch_loss)
     valid_loss.append(valid_epoch_loss)
@@ -148,7 +149,7 @@ for epoch in range(epochs):
     print("-" * 50)
 
 
-torch.save(model.state_dict(), "./model_VGG19_BN.pth")
+torch.save(model.state_dict(), "./model_ResNet50.pth")
 
 plt.figure(figsize=(10, 5))
 
@@ -169,4 +170,4 @@ plt.legend()
 plt.title("Training and Validation Accuracy")
 
 # Save the figure as an image
-plt.savefig("./VGG19_BN_plot.png")
+plt.savefig ( "./ResNet50_plot.png" )
