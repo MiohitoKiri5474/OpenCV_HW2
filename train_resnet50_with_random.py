@@ -25,6 +25,7 @@ transform = transforms.Compose(
         transforms.CenterCrop(224),
         transforms.ToTensor(),
         transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225]),
+        trnasforms.RandomErasing(),
     ]
 )
 
@@ -153,4 +154,4 @@ for epoch in range(epochs):
     print("-" * 50)
 
 
-torch.save(model.state_dict(), "./model_ResNet50.pth")
+torch.save(model.state_dict(), "./model_ResNet50_with_random.pth")
