@@ -5,14 +5,13 @@ import torch.nn as nn
 import torch.optim as optim
 import torchvision
 import torchvision.transforms as transforms
-from torch.nn.modules.loss import BCEWithLogitsLoss
 from tqdm import tqdm
 
 from model import ResNet
 
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+device = torch.device ( "cuda" if torch.cuda.is_available() else "cpu" )
 epochs = 30
-batch_size = 32
+batch_size = 16
 learning_rate = 0.001
 
 transform = transforms.Compose(
@@ -42,30 +41,15 @@ valid_loader = torch.utils.data.DataLoader(
     valid_dataset, batch_size=batch_size, shuffle=False
 )
 
-# model = ResNet(blocks=[3, 4, 6, 3], num_classes=10).to(device)
-model = torchvision.models.resnet50 ( pretrained = True )
-
-for params in model.parameters():
-    params.requires_grad_ = False
-
-nr_filters = model.fc.in_features
-model.fc = nn.Linear(nr_filters, 1)
-
-model = model.to(device)
-optimizer = torch.optim.Adam(model.fc.parameters())
-
-
-criterion = BCEWithLogitsLoss()
-
-losses = []
-val_losses = []
-
-epoch_train_losses = []
-epoch_test_losses = []
+model = ResNet ( blocks = [3, 4, 6, 3], num_classes = 10 ).to ( device )
 
 
 total_params = sum(p.numel() for p in model.parameters())
 total_trainable_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
+
+criterion = torch.nn.CrossEntropyLoss()
+optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
+
 
 print(f"[INFO]: Computation device: {device}")
 print(f"[INFO]: {total_params:,} total parameters.")
@@ -84,14 +68,15 @@ def training(model, dataloader, optimizer, criterion):
         counter += 1
         image, labels = data
         image = image.to(device)
-        labels = labels.unsqueeze ( 1 ).float().to ( device )
+        labels = labels.to(device)
 
         optimizer.zero_grad()
         output = model(image)
-
         loss = criterion(output, labels)
         train_running_loss += loss.item()
+        _, preds = torch.max(output.data, 1)
 
+        train_running_correct += (preds == labels).sum().item()
         loss.backward()
         optimizer.step()
 
@@ -119,12 +104,23 @@ def validating(model, dataloader, criterion):
             image = image.to(device)
             labels = labels.to(device)
 
-            output = model(image)[:,0]
-            loss = criterion(output, labels.float())
+            output = model(image)
+            loss = criterion(output, labels)
             valid_running_loss += loss.item()
+            _, preds = torch.max(output.data, 1)
+            valid_running_correct += (preds == labels).sum().item()
+
+            correct = (preds == labels).squeeze()
+
+            for i in range(len(preds)):
+                label = labels[i]
+                class_correct[label] += correct[i].item()
+                class_total[label] += 1
 
     epoch_loss = valid_running_loss / counter
     epoch_acc = 100.0 * (valid_running_correct / len(dataloader.dataset))
+    print("\n")
+
     return epoch_loss, epoch_acc
 
 
@@ -154,3 +150,24 @@ for epoch in range(epochs):
 
 
 torch.save(model.state_dict(), "./model_ResNet50.pth")
+
+plt.figure(figsize=(10, 5))
+
+plt.subplot(2, 1, 1)
+plt.plot(train_loss, label="Training Loss")
+plt.plot(valid_loss, label="Validation Loss")
+plt.xlabel("Epochs")
+plt.ylabel("Loss")
+plt.legend()
+plt.title("Training and Validation Loss")
+
+plt.subplot(2, 1, 2)
+plt.plot(train_acc, label="Training Accuracy")
+plt.plot(valid_acc, label="Validation Accuracy")
+plt.xlabel("Epochs")
+plt.ylabel("Accuracy")
+plt.legend()
+plt.title("Training and Validation Accuracy")
+
+# Save the figure as an image
+plt.savefig ( "./ResNet50_plot.png" )

@@ -26,7 +26,6 @@ from PyQt5.QtWidgets import (
 )
 
 from model import VGG19 as vgg19_bn
-from model import ResNet as resnet50
 
 file_name = None
 image = None
@@ -37,31 +36,27 @@ window = QWidget()
 Block1_label = QLabel("There are _ coins in the image. ")
 Block4_blank = QLabel("")
 Block4_blank.setAlignment(Qt.AlignCenter)
-Block4_blank.setFixedSize(600, 300)
-Block5_blank = QLabel ("")
-Block5_blank.setAlignment ( Qt.AlignCenter )
-Block5_blank.setFixedSize ( 600, 300 )
-Block5_Predict = QLabel ( "" )
+Block4_blank.setFixedSize(800, 400)
 blank_pixmap = QPixmap(Block4_blank.size())
 Block4_Predict = QLabel("")
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 vgg19_model = None
-resnet50_model = None
 
 
 def load_vgg19():
     global vgg19_model
-    vgg19_model_path = "model_VGG19_BN.pth"
+    vgg19_model_path = "./model/model_VGG19_BN.pth"
     vgg19_model = vgg19_bn(in_channels=1, num_classes=10).to(device)
     state_dict = torch.load("model_VGG19_BN.pth", map_location=torch.device(device))
     vgg19_model.load_state_dict(state_dict)
     vgg19_model.to(device)
     vgg19_model.eval()
 
+<<<<<<< HEAD
 def load_resnet50():
     global resnet50_model
-    resnet50_model_path = "model_ResNet50.pth"
+    resnet50_model_path = "./model/model_ResNet50.pth"
     # resnet50_model = resnet50 ( blocks = [3, 4, 6, 3], num_classes = 10 ).to ( device )
     resnet50_model = torchvision.models.resnet50().to ( device )
     nr_filters = resnet50_model.fc.in_features
@@ -72,22 +67,15 @@ def load_resnet50():
     resnet50_model.eval()
    
 transform_VGG19_BN = transforms.Compose(
+=======
+
+transform = transforms.Compose(
+>>>>>>> parent of cba91f6... finish resnet50 training
     [
         transforms.ToPILImage(),
         transforms.Resize((224, 224)),
         transforms.ToTensor(),
         transforms.Normalize(mean=[0.5], std=[0.5]),
-    ]
-)
-
-transform_ResNet50 = transforms.Compose(
-    [
-        transforms.ToPILImage(),
-        transforms.Resize(256),
-        transforms.ColorJitter(brightness=0.5, contrast=0.5, saturation=0.5, hue=0.5),
-        transforms.CenterCrop(224),
-        transforms.ToTensor(),
-        transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225]),
     ]
 )
 
@@ -329,8 +317,13 @@ def Block4_btn_4_1_clicked():
 
 
 def Block4_btn_4_2_clicked():
+<<<<<<< HEAD
     print ( "4.2 Show Accuracy and Loss Clicked" )
+    pixmap = QPixmap("./plot/VGG19_BN_plot.png")
+=======
+    print("TODO: 4.2")
     pixmap = QPixmap("VGG19_BN_plot.png")
+>>>>>>> parent of cba91f6... finish resnet50 training
     pixmap = pixmap.scaled(Block4_blank.size(), Qt.KeepAspectRatio)
     Block4_blank.setPixmap(pixmap)
     Block4_blank.setAlignment(Qt.AlignCenter)
@@ -344,7 +337,7 @@ def Block4_btn_4_3_clicked():
 
     ori_img = cv2.imread("predict.png")
     gray_img = cv2.cvtColor(ori_img, cv2.COLOR_BGR2GRAY)
-    image = transform_VGG19_BN(gray_img)
+    image = transform(gray_img)
     image = image.unsqueeze(0).to(device)
     output = vgg19_model(image)
     label = np.array(output.detach()).argmax()
@@ -376,18 +369,12 @@ def Block4_btn_4_4_clicked():
 def Block5_load_img_clicked():
     global Block5_img
     get_path()
-    Block5_img = cv2.imread(file_name)
-    if Block5_img is None:
+    Block5_image = cv2.imread(file_name)
+    if image is None:
         print("[ERROR]: Image cannot load. ")
     else:
         print("Loaded Image ", file_name)
 
-    pixmap = QPixmap ( file_name )
-    pixmap = pixmap.scaled ( Block5_blank.size(), Qt.KeepAspectRatio )
-    Block5_blank.setPixmap ( pixmap )
-    Block5_blank.setAlignment ( Qt.AlignCenter )
-
-    Block5_Predict.setText ( "" )
 
 def Block5_btn_5_1_clicked():
     print("5.1 Show Images clicked")
@@ -410,8 +397,9 @@ def Block5_btn_5_1_clicked():
 def Block5_btn_5_2_clicked():
     print("TODO: 5.2")
     print("5.2 Show Model Structure clicked")
+    _model = torchvision.models.resnet50()
 
-    torchsummary.summary(resnet50_model, (3, 224, 224))
+    torchsummary.summary(_model, (3, 224, 224))
 
 
 def Block5_btn_5_3_clicked():
@@ -419,27 +407,7 @@ def Block5_btn_5_3_clicked():
 
 
 def Block5_btn_5_4_clicked():
-    if Block5_img is None:
-        print ( "[ERROR]: Please load image first." )
-        return
-
-    image = transform_ResNet50 ( Block5_img )
-    image = image.unsqueeze( 0 ).to ( device )
-
-    result = None
-    print ( type ( image ) )
-
-    with torch.no_grad():
-        print ( type ( image ) )
-        output = resnet50_model ( image )
-        pro = torch.sigmoid ( output )
-        print ( pro )
-
-        result = ( "Cat" if pro < 0.5 else "Dog" )
-
-    print ( result )
-    if result is not None:
-        Block5_Predict.setText ( result )
+    print("TODO: 5.4")
 
 
 def main():
@@ -545,8 +513,6 @@ def main():
     block4.setLayout(Block4_layout_overall_with_title)
 
     # For Block3
-    Block5_layout_overall = QHBoxLayout()
-    Block5_img_layout = QVBoxLayout()
     Block5_layout = QVBoxLayout()
     Block5_layout.addWidget(QLabel("5. ResNet50"))
     Block5_layout.addWidget(Block5_load_img)
@@ -554,14 +520,7 @@ def main():
     Block5_layout.addWidget(Block5_btn_5_2)
     Block5_layout.addWidget(Block5_btn_5_3)
     Block5_layout.addWidget(Block5_btn_5_4)
-
-    Block5_img_layout.addWidget ( Block5_blank )
-    Block5_img_layout.addWidget ( Block5_Predict )
-
-    Block5_layout_overall.addLayout ( Block5_layout )
-    Block5_layout_overall.addLayout ( Block5_img_layout )
-
-    block5.setLayout(Block5_layout_overall)
+    block5.setLayout(Block5_layout)
 
     # --------------------------- #
     # Connect functions and BNTs
@@ -624,5 +583,4 @@ def main():
 
 if __name__ == "__main__":
     load_vgg19()
-    load_resnet50()
     main()

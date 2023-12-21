@@ -20,6 +20,5 @@ Thumbs.db
 node_modules
 .sass-cache
 data/
-*.pth
+model/
 data*/
-*.png
