@@ -25,7 +25,7 @@ transform = transforms.Compose(
         transforms.CenterCrop(224),
         transforms.ToTensor(),
         transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225]),
-        trnasforms.RandomErasing(),
+        transforms.RandomErasing(),
     ]
 )
 
@@ -44,7 +44,7 @@ valid_loader = torch.utils.data.DataLoader(
 )
 
 # model = ResNet(blocks=[3, 4, 6, 3], num_classes=10).to(device)
-model = torchvision.models.resnet50 ( pretrained = True )
+model = torchvision.models.resnet50(pretrained=True)
 
 for params in model.parameters():
     params.requires_grad_ = False
@@ -85,7 +85,7 @@ def training(model, dataloader, optimizer, criterion):
         counter += 1
         image, labels = data
         image = image.to(device)
-        labels = labels.unsqueeze ( 1 ).float().to ( device )
+        labels = labels.unsqueeze(1).float().to(device)
 
         optimizer.zero_grad()
         output = model(image)
@@ -120,7 +120,7 @@ def validating(model, dataloader, criterion):
             image = image.to(device)
             labels = labels.to(device)
 
-            output = model(image)[:,0]
+            output = model(image)[:, 0]
             loss = criterion(output, labels.float())
             valid_running_loss += loss.item()
 

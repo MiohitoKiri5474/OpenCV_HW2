@@ -8,8 +8,8 @@ run:
 	poetry run python3 main.py
 
 lint:
-	isort *.py
-	black *.py
+	isort *.py */*.py
+	black *.py */*.py
 
 train_vgg19:
 	poetry run python3 train_vgg19.py

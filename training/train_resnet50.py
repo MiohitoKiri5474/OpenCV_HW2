@@ -9,7 +9,7 @@ from tqdm import tqdm
 
 from model import ResNet
 
-device = torch.device ( "cuda" if torch.cuda.is_available() else "cpu" )
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 epochs = 30
 batch_size = 16
 learning_rate = 0.001
@@ -41,7 +41,7 @@ valid_loader = torch.utils.data.DataLoader(
     valid_dataset, batch_size=batch_size, shuffle=False
 )
 
-model = ResNet ( blocks = [3, 4, 6, 3], num_classes = 10 ).to ( device )
+model = ResNet(blocks=[3, 4, 6, 3], num_classes=10).to(device)
 
 
 total_params = sum(p.numel() for p in model.parameters())
@@ -170,4 +170,4 @@ plt.legend()
 plt.title("Training and Validation Accuracy")
 
 # Save the figure as an image
-plt.savefig ( "./ResNet50_plot.png" )
+plt.savefig("./ResNet50_plot.png")
