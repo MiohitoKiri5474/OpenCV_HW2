@@ -81,6 +81,17 @@ transform_VGG19_BN = transforms.Compose(
     ]
 )
 
+transform_ResNet50 = transforms.Compose(
+    [
+        transforms.ToPILImage(),
+        transforms.Resize(256),
+        transforms.ColorJitter(brightness=0.5, contrast=0.5, saturation=0.5, hue=0.5),
+        transforms.CenterCrop(224),
+        transforms.ToTensor(),
+        transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225]),
+    ]
+)
+
 
 # General
 def get_path():
@@ -367,8 +378,8 @@ def Block4_btn_4_4_clicked():
 def Block5_load_img_clicked():
     global Block5_img
     get_path()
-    Block5_image = cv2.imread(file_name)
-    if Block5_image is None:
+    Block5_img = cv2.imread(file_name)
+    if Block5_img is None:
         print("[ERROR]: Image cannot load. ")
     else:
         print("Loaded Image ", file_name)
@@ -412,9 +423,15 @@ def Block5_btn_5_3_clicked():
 def Block5_btn_5_4_clicked():
     print("5.4 Inference clicked")
 
-    if Block5_image is None:
+    if Block5_img is None:
         print("[ERROR]: Please load image first. ")
         return
+
+    image = transform_ResNet50(Block5_img)
+    image = image.unsqueeze(dim=0).to(device)
+    output = "Cat" if torch.sigmoid(resnet50_model(image)) < 0.5 else "Dog"
+
+    Block5_predict.setText(output)
 
 
 def main():
