@@ -352,6 +352,7 @@ def Block4_btn_4_3_clicked():
     label = np.array(output.detach()).argmax()
 
     Block4_predict.setText(str(label))
+    Block4_predict.setAlignment(Qt.AlignCenter)
 
     plt.bar(
         range(10),
@@ -372,6 +373,7 @@ def Block4_btn_4_4_clicked():
     print("4.4 Reset clicked")
     clear_block4_blank()
     Block4_predict.setText("")
+    Block4_predict.setAlignment(Qt.AlignCenter)
 
 
 # For Block5
@@ -385,6 +387,7 @@ def Block5_load_img_clicked():
         print("Loaded Image ", file_name)
 
     Block5_predict.setText("")
+    Block5_predict.setAlignment(Qt.AlignCenter)
 
     pixmap = QPixmap(file_name)
     pixmap = pixmap.scaled(Block5_blank.size(), Qt.KeepAspectRatio)
@@ -417,7 +420,14 @@ def Block5_btn_5_2_clicked():
 
 
 def Block5_btn_5_3_clicked():
-    print("TODO: 5.3")
+    print("5.3 Show Comprasion clicked")
+
+    plot = cv2.imread("./plot/ResNet50_comparison.png")
+
+    plt.title("Comprasion")
+    plt.imshow(cv2.cvtColor(plot, cv2.COLOR_BGR2RGB))
+    plt.axis("off")
+    plt.show()
 
 
 def Block5_btn_5_4_clicked():
@@ -432,6 +442,7 @@ def Block5_btn_5_4_clicked():
     output = "Cat" if torch.sigmoid(resnet50_model(image)) < 0.5 else "Dog"
 
     Block5_predict.setText(output)
+    Block5_predict.setAlignment(Qt.AlignCenter)
 
 
 def main():
